@@ -1,0 +1,14 @@
+Loadstring for the Manager Steal Script as promised:
+
+--[
+game:GetService("StarterGui"):SetCore("SendNotification",{Title="Welcome",Text="Welcome to Sam's Manager Steal Script. Type /manager", Duration=15})
+local steal = loadstring(game:HttpGet("https://raw.githubusercontent.com/l3g3ndarysam/WorkAtAPizzaPlace/main/ManagerSteal"))
+workspace.Main.Chatted.Chatted.Event:Connect(function(msg)
+if msg=="/manager" or msg=="\\manager" then
+steal()
+end
+end)
+
+]--
+
+by l3g3ndary_sam.
