@@ -1,0 +1,100 @@
+--Manager Steal by l3g3ndary_sam.
+
+--Variables:
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local humanoid = player.Character.Humanoid
+local mteam = game:GetService("Teams").Manager
+local man = mteam:GetPlayers()[1]
+--In the Manager's office there is a chair infront of the Manager's Office Chair. This will remove it temporarily (Only you will notice this [Filtering Enabled]) 
+if workspace:FindFirstChild("ExtraChair") and workspace.ExtraChair:FindFirstChild("Seat") then
+	workspace.ExtraChair.Seat:Destroy()
+end
+
+if man then
+	--This will check if the manager is sat on a chair. If the manager is seated the script will not work and will cancel. It can be run again until the manager is no longer seated.
+	local htxt
+	if man.Character==nil or man.Character:FindFirstChild("HumanoidRootPart")==nil or man.Character:FindFirstChild("Humanoid")==nil then
+		htxt = "Failed because manager is respawning"
+	end
+	local target = man.Character.HumanoidRootPart
+	if man.Character.Humanoid.Sit then
+		htxt = "Failed because manager is sitting"
+	end
+	if htxt then
+		local h = Instance.new("Message",workspace)
+		h.Text = htxt
+		wait(3)
+		h:Destroy()
+		return
+	end
+	--Places the player inside one of the cars, and teleports it to the manager forcing them to sit on the front of the car.
+	if not workspace.Cars:IsAncestorOf(humanoid.SeatPart) then
+		humanoid.Sit=false
+		wait(0.1)
+		for _,car in ipairs(workspace.Cars:GetChildren()) do
+			if car:FindFirstChild("Driver") and car.Driver.Occupant==nil and car:FindFirstChild("Owner") and car.Owner.Value==nil then
+				car.Driver:Sit(humanoid)
+				wait(0.3)
+				if humanoid.SeatPart then
+					break
+				end
+			end
+		end
+	end
+	local seat = humanoid.SeatPart
+	local car = seat.Parent
+	local returncf = CFrame.new(17,-3.5,21)*CFrame.Angles(0,math.pi/2,0)
+	for _,v in ipairs(car:GetChildren()) do if v.Name=="Wheel" then v.CanCollide=false end end
+	seat.CanCollide = false
+	for j=1,4 do
+		--This will attempt to place the manager on the front of the Vehicle.
+		seat.Anchored=false
+		local e = 0
+		while car.HoodSeat.Occupant==nil and mteam:GetPlayers()[1] and target.Parent and e<5 do
+			local newpos = target.Position+Vector3.new(0,-3,0)+target.CFrame.lookVector*4.5+target.Velocity*Vector3.new(.5,0,.5)
+			local flatdir = (target.CFrame.lookVector*Vector3.new(1,0,1)).Unit --target's looking direction, flattened
+			if not (flatdir.x < 2) then --inf
+				flatdir = Vector3.new(1,0,0)
+			end
+			car:SetPrimaryPartCFrame(CFrame.new(newpos,newpos-flatdir))
+			seat.Velocity=Vector3.new()
+			local e2=0
+			while car.HoodSeat.Occupant==nil and mteam:GetPlayers()[1] and target.Parent and e2<0.7 do
+				e2=e2+wait()
+			end
+			e=e+e2
+		end
+		--This will move the manager and place the player onto the 'Vote Remove Manager' button.
+		car:SetPrimaryPartCFrame(returncf)
+		wait(.1)
+		car:SetPrimaryPartCFrame(returncf)
+		seat.Anchored=true
+		e = 0
+		while mteam:GetPlayers()[1] and target.Parent and e<1 do
+			e=e+wait()
+		end
+		car.HoodSeat:ClearAllChildren() --unsits anyone
+		e = 0
+		while mteam:GetPlayers()[1] and target.Parent and e<0.5 do
+			e=e+wait()
+		end
+		if mteam:GetPlayers()[1]==nil or target.Parent==nil then
+			break
+		end
+	end
+	--This will reset the car, moving it back to the original position.
+	seat.Anchored=false
+	wait()
+	car:SetPrimaryPartCFrame(CFrame.new(120,10,-75))
+	wait()
+end
+
+--This will teleport the player to the Manager Seat in the Manager's office, quicker than a player with the teleport gamepass.
+humanoid.Sit=false
+wait(0.1)
+pcall(function() workspace.ManagerChair.Seat:Sit(humanoid) end)
+wait(0.3)
+humanoid.Jump=true
+wait(0.1)
+player.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame+Vector3.new(5,5,6)
